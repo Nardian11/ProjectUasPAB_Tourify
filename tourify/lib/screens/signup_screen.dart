@@ -50,11 +50,23 @@ class _SignUpScreenState extends State<SignUpScreen> {
     if (!isValid) return;
 
     final prefs = await SharedPreferences.getInstance();
+
+    if (prefs.containsKey('${email}_password')) {
+      setState(() {
+        _emailError = 'Email is already registered!';
+      });
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Email already exists. Please login.')),
+      );
+      return;
+    }
+
     String encryptedPassword = EncryptionHelper.encryptPassword(password);
 
-    await prefs.setString('user_name', name);
-    await prefs.setString('user_email', email);
-    await prefs.setString('user_password', encryptedPassword);
+    await prefs.setString('${email}_name', name);
+    await prefs.setString('${email}_password', encryptedPassword);
+    
+    await prefs.setString('current_user_email', email); 
 
     if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(

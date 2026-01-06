@@ -1,7 +1,7 @@
-import 'dart:io'; // Import untuk menangani File gambar
+import 'dart:io'; 
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:image_picker/image_picker.dart'; // Import Image Picker
+import 'package:image_picker/image_picker.dart'; 
 import 'package:tourify/screens/profile_screen.dart';
 
 class EditProfileScreen extends StatefulWidget {
@@ -17,7 +17,8 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   final TextEditingController _locationController = TextEditingController();
   final TextEditingController _phoneController = TextEditingController();
 
-  String? _imagePath; // Variabel untuk menampung path gambar di HP
+  String? _imagePath; 
+  String _currentUserEmail = '';
 
   @override
   void initState() {
@@ -27,8 +28,11 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
 
   void _loadUserData() async {
     final prefs = await SharedPreferences.getInstance();
+    
+    _currentUserEmail = prefs.getString('current_user_email') ?? '';
+
     setState(() {
-      String fullName = prefs.getString('user_name') ?? '';
+      String fullName = prefs.getString('${_currentUserEmail}_name') ?? '';
       List<String> nameParts = fullName.split(' ');
       if (nameParts.isNotEmpty) {
         _firstNameController.text = nameParts[0];
@@ -36,23 +40,20 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
           _lastNameController.text = nameParts.sublist(1).join(' ');
         }
       }
-      _locationController.text = prefs.getString('user_location') ?? 'Indonesia';
-      _phoneController.text = prefs.getString('user_phone') ?? '';
+      _locationController.text = prefs.getString('${_currentUserEmail}_location') ?? 'Indonesia';
+      _phoneController.text = prefs.getString('${_currentUserEmail}_phone') ?? '';
       
-      // Load path gambar yang tersimpan
-      _imagePath = prefs.getString('user_profile_image');
+      _imagePath = prefs.getString('${_currentUserEmail}_profile_image');
     });
   }
 
-  // FUNGSI UNTUK AMBIL GAMBAR DARI GALERI
   Future<void> _pickImage() async {
     final ImagePicker picker = ImagePicker();
-    // Pilih gambar dari galeri
     final XFile? image = await picker.pickImage(source: ImageSource.gallery);
 
     if (image != null) {
       setState(() {
-        _imagePath = image.path; // Simpan path gambar sementara di state
+        _imagePath = image.path;
       });
     }
   }
@@ -61,20 +62,18 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     final prefs = await SharedPreferences.getInstance();
     String fullName = '${_firstNameController.text.trim()} ${_lastNameController.text.trim()}'.trim();
     
-    await prefs.setString('user_name', fullName);
-    await prefs.setString('user_location', _locationController.text.trim());
-    await prefs.setString('user_phone', _phoneController.text.trim());
+    await prefs.setString('${_currentUserEmail}_name', fullName);
+    await prefs.setString('${_currentUserEmail}_location', _locationController.text.trim());
+    await prefs.setString('${_currentUserEmail}_phone', _phoneController.text.trim());
     
-    // Simpan path gambar ke memori permanen jika ada
     if (_imagePath != null) {
-      await prefs.setString('user_profile_image', _imagePath!);
+      await prefs.setString('${_currentUserEmail}_profile_image', _imagePath!);
     }
 
     if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Profile updated successfully!')),
       );
-      // Kembali ke halaman Profile dan refresh
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(builder: (context) => const ProfileScreen()),

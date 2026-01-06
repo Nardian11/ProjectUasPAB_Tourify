@@ -30,9 +30,7 @@ class _SignInScreenState extends State<SignInScreen> {
 
     final prefs = await SharedPreferences.getInstance();
     
-    String? storedEmail = prefs.getString('user_email');
-    String? storedPhone = prefs.getString('user_phone');
-    String? storedEncryptedPass = prefs.getString('user_password');
+    String? storedEncryptedPass = prefs.getString('${inputIdentifier}_password');
 
     if (storedEncryptedPass == null) {
        ScaffoldMessenger.of(context).showSnackBar(
@@ -48,11 +46,9 @@ class _SignInScreenState extends State<SignInScreen> {
       decryptedStoredPass = ""; 
     }
 
-    bool isUserMatch = (inputIdentifier == storedEmail) || (inputIdentifier == storedPhone);
-    bool isPasswordMatch = (inputPassword == decryptedStoredPass);
-
-    if (isUserMatch && isPasswordMatch) {
+    if (inputPassword == decryptedStoredPass) {
       await prefs.setBool('is_login', true);
+      await prefs.setString('current_user_email', inputIdentifier);
 
       if (mounted) {
         Navigator.pushReplacement(
@@ -62,7 +58,7 @@ class _SignInScreenState extends State<SignInScreen> {
       }
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Invalid Email/Phone or Password')),
+        const SnackBar(content: Text('Invalid Email or Password')),
       );
     }
   }
@@ -92,7 +88,7 @@ class _SignInScreenState extends State<SignInScreen> {
               child: Container(
                 padding: const EdgeInsets.all(24),
                 decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.95), 
+                  color: Colors.white.withOpacity(0.95),
                   borderRadius: BorderRadius.circular(20),
                 ),
                 child: Column(
@@ -104,7 +100,7 @@ class _SignInScreenState extends State<SignInScreen> {
                       style: TextStyle(
                         fontSize: 24,
                         fontWeight: FontWeight.bold,
-                        color: Color(0xFF1A4D2E), 
+                        color: Color(0xFF1A4D2E),
                       ),
                     ),
                     const SizedBox(height: 8),
@@ -120,7 +116,7 @@ class _SignInScreenState extends State<SignInScreen> {
                     TextFormField(
                       controller: _identifierController,
                       decoration: InputDecoration(
-                        hintText: 'Email or Phone Number', 
+                        hintText: 'Email or Phone Number',
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(10),
                         ),
@@ -152,18 +148,7 @@ class _SignInScreenState extends State<SignInScreen> {
                       ),
                     ),
                     
-                    Align(
-                      alignment: Alignment.centerRight,
-                      child: TextButton(
-                        onPressed: () {},
-                        child: const Text(
-                          'Forgot password?',
-                          style: TextStyle(color: Colors.grey, fontSize: 12),
-                        ),
-                      ),
-                    ),
-                    
-                    const SizedBox(height: 10),
+                    const SizedBox(height: 24),
                     
                     SizedBox(
                       width: double.infinity,
@@ -208,6 +193,7 @@ class _SignInScreenState extends State<SignInScreen> {
                         ],
                       ),
                     ),
+                    
                     const SizedBox(height: 10),
                   ],
                 ),

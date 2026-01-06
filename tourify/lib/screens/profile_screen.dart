@@ -27,16 +27,19 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   void _loadUserData() async {
     final prefs = await SharedPreferences.getInstance();
+    
+    String currentEmail = prefs.getString('current_user_email') ?? '';
+
     setState(() {
-      _userName = prefs.getString('user_name') ?? 'Guest User';
-      _userEmail = prefs.getString('user_email') ?? 'No Email';
-      _userPhone = prefs.getString('user_phone') ?? '-';
-      _userLocation = prefs.getString('user_location') ?? '-';
-      _imagePath = prefs.getString('user_profile_image');
+      _userName = prefs.getString('${currentEmail}_name') ?? 'Guest User';
+      _userEmail = currentEmail;
+      _userPhone = prefs.getString('${currentEmail}_phone') ?? '-';
+      _userLocation = prefs.getString('${currentEmail}_location') ?? '-';
+      
+      _imagePath = prefs.getString('${currentEmail}_profile_image');
     });
   }
 
-  // Fungsi Logout
   void _logout() async {
     showDialog(
       context: context,
@@ -50,9 +53,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
           ),
           TextButton(
             onPressed: () async {
-              Navigator.pop(context); 
+              Navigator.pop(context);
               final prefs = await SharedPreferences.getInstance();
               await prefs.setBool('is_login', false);
+              
               if (mounted) {
                 Navigator.pushAndRemoveUntil(
                   context,
@@ -71,7 +75,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white, 
+      backgroundColor: Colors.white,
       appBar: AppBar(
         backgroundColor: Colors.white,
         elevation: 0,
@@ -91,7 +95,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
           ),
         ),
         actions: [
-          // Tombol Edit di Kanan Atas
           IconButton(
             icon: const Icon(Icons.edit_outlined, color: Colors.black),
             onPressed: () {
@@ -107,7 +110,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
         padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 20.0),
         child: Column(
           children: [
-            // --- 1. FOTO & INFO UTAMA ---
             Center(
               child: Column(
                 children: [
@@ -140,13 +142,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
             const SizedBox(height: 30),
             const Divider(),
 
-            // --- 2. INFO DETAIL (Phone & Region) ---
             _buildInfoTile(Icons.phone_outlined, "Phone Number", _userPhone),
             _buildInfoTile(Icons.location_on_outlined, "Region", _userLocation),
             
             const Divider(), 
 
-            // --- 3. MENU NAVIGASI (Favorites) ---
             ListTile(
               contentPadding: const EdgeInsets.symmetric(vertical: 8),
               leading: Container(
@@ -171,13 +171,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
             ),
 
             const SizedBox(height: 40),
-            // --- 4. TOMBOL LOGOUT ---
+
             SizedBox(
               width: double.infinity,
               height: 55,
               child: TextButton(
                 style: TextButton.styleFrom(
-                  backgroundColor: const Color(0xFFFEE2E2), 
+                  backgroundColor: const Color(0xFFFEE2E2),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(16),
                   ),
