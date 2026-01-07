@@ -1,5 +1,3 @@
-// File: lib/screens/destinationlist_screen.dart
-
 import 'package:flutter/material.dart';
 import 'package:tourify/data/wisata_data.dart';
 import 'package:tourify/models/wisata.dart';
